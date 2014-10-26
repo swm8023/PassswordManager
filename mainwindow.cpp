@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "ui_detail.h"
+#include "ui_config.h"
 #include "dbutil.h"
 #include <QFileDialog>
 #include <QInputDialog>
@@ -57,6 +58,7 @@ void MainWindow::on_actionNewFile_triggered()
 
     this->pfu->filename = filename;
     this->pfu->filepass = filepass;
+    this->config = this->pfu->readConfig();
 
     QVector<PassRecord> qrec;
     this->pfu->getContent(qrec);
@@ -75,7 +77,7 @@ void MainWindow::on_actionLoadFile_triggered()
         return;
     }
 
-    filepass = QInputDialog::getText(this, tr("输入密钥"), tr("密钥"));
+    filepass = QInputDialog::getText(this, tr("输入密钥"), tr("密钥"), QLineEdit::Password);
 
     if (filepass.isEmpty()) {
         QMessageBox::information(this, tr("错误"), tr("密钥为空"));
@@ -91,6 +93,7 @@ void MainWindow::on_actionLoadFile_triggered()
 
     this->pfu->filename = filename;
     this->pfu->filepass = filepass;
+    this->config = this->pfu->readConfig();
 
     QVector<PassRecord> qrec;
     this->pfu->getContent(qrec);
@@ -206,7 +209,41 @@ void MainWindow::on_btEdit_clicked()
     }
 }
 
-void MainWindow::on_action_triggered()
+void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, tr("关于"), tr("Version: 1.0\nAuthor: Vimer"));
+}
+
+void MainWindow::on_actionConfig_triggered()
+{
+    if (this->pfu->filename.isEmpty()) {
+        QMessageBox::information(this, tr("错误"), tr("未打开文件"));
+        return;
+    }
+
+    Ui_Config ud;
+    QDialog dlg;
+    ud.setupUi(&dlg);
+
+
+    int oldeType = this->config[QString("entype")].toInt();
+    QButtonGroup qb;
+    qb.addButton(ud.radioe0, 0);
+    qb.addButton(ud.radioe1, 1);
+    qb.addButton(ud.radioe2, 2);
+    qb.addButton(ud.radioe3, 3);
+    qb.button(oldeType)->setChecked(true);
+    if (dlg.exec() == QDialog::Rejected) {
+        return;
+    }
+    int neweType = qb.checkedId();
+    if (neweType != oldeType) {
+        this->config[QString("entype")] = neweType;
+        this->pfu->updateConfig(this->config);
+        foreach (PassRecord p, this->pm->rec) {
+            p.entype = neweType;
+            this->pfu->updateRecord(p);
+        }
+
+    }
 }

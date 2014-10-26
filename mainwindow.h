@@ -34,7 +34,9 @@ private slots:
 
     void on_btEdit_clicked();
 
-    void on_action_triggered();
+    void on_actionAbout_triggered();
+
+    void on_actionConfig_triggered();
 
 private:
     QLabel *stlabel;

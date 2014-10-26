@@ -140,9 +140,6 @@
      <bool>false</bool>
     </attribute>
    </widget>
-   <zorder>verticalLayoutWidget</zorder>
-   <zorder>passTable</zorder>
-   <zorder>passTable</zorder>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QMenuBar" name="menuBar">
@@ -177,7 +174,6 @@
     </property>
     <addaction name="actionNewFile"/>
     <addaction name="actionLoadFile"/>
-    <addaction name="action_4"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="font">
@@ -189,7 +185,7 @@
     <property name="title">
      <string>工具</string>
     </property>
-    <addaction name="action_2"/>
+    <addaction name="actionConfig"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="font">
@@ -201,7 +197,7 @@
     <property name="title">
      <string>帮助</string>
     </property>
-    <addaction name="action"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_3"/>
@@ -212,7 +208,7 @@
     <string>载入</string>
    </property>
   </action>
-  <action name="action_2">
+  <action name="actionConfig">
    <property name="text">
     <string>选项</string>
    </property>
@@ -238,7 +234,7 @@
     <string>新建</string>
    </property>
   </action>
-  <action name="action">
+  <action name="actionAbout">
    <property name="text">
     <string>关于</string>
    </property>

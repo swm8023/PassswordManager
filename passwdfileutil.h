@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QVector>
+#include <QMap>
+#include <QVariant>
 
 struct PassRecord{
     int id;
@@ -28,6 +30,9 @@ public:
     bool checkPasswd(QString filename, QString filepass);
     QString decodepass(QByteArray bar, int entype);
     QByteArray encodepass(QString str, int entype);
+
+    QMap<QString, QVariant> readConfig();
+    bool updateConfig(QMap<QString, QVariant> config);
 
 };
 

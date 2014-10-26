@@ -61,6 +61,15 @@ QString PasswdFileUtil::decodepass(QByteArray bar, int entype)
             if (pos++ == fpass.length()) pos = 0;
         }
         return bar;
+    // 公钥加密
+    } else if(entype == 2) {
+        QByteArray fpass = QString("vimersu").toUtf8();
+        int pos = 0;
+        for (int i = 0; i < bar.length(); i++) {
+            bar[i] = bar[i] ^ fpass[pos];
+            if (pos++ == fpass.length()) pos = 0;
+        }
+        return bar;
     }
     return QString();
 }
@@ -72,6 +81,16 @@ QByteArray PasswdFileUtil::encodepass(QString str, int entype) {
     // 异或加密
     } else if (entype == 1) {
         QByteArray fpass = this->filepass.toUtf8();
+        QByteArray enpass = str.toUtf8();
+        int pos = 0;
+        for (int i = 0; i < enpass.length(); i++) {
+            enpass[i] = enpass[i] ^ fpass[pos];
+            if (pos++ == fpass.length()) pos = 0;
+        }
+        return enpass;
+    // 公钥加密
+    } else if(entype == 2) {
+        QByteArray fpass = QString("vimersu").toUtf8();
         QByteArray enpass = str.toUtf8();
         int pos = 0;
         for (int i = 0; i < enpass.length(); i++) {
@@ -102,8 +121,12 @@ bool PasswdFileUtil::createFile(QString filename, QString filepass)
         return false;
     }
 
-    creatStr = "CREATE TABLE \"mypass\" ("
-                    "\"pass\"  TEXT);";
+    creatStr = "CREATE TABLE \"config\" ("
+                "\"pass\"  TEXT,"
+                "\"entype\"  INTEGER,"
+                "\"serverip\"  TEXT,"
+                "\"serverpt\"  INTEGER);";
+
 
     if (db.exec(creatStr) == false) {
         return false;
@@ -113,7 +136,7 @@ bool PasswdFileUtil::createFile(QString filename, QString filepass)
     md5fname = QCryptographicHash::hash(filepass.toLocal8Bit(), QCryptographicHash::Md5);
     md5fname = QCryptographicHash::hash(md5fname, QCryptographicHash::Md5);
 
-    return db.exec(QString("INSERT INTO mypass (pass) VALUES ('" +md5fname.toHex()+ "')"));
+    return db.exec(QString("INSERT INTO config (pass, entype) VALUES ('" +md5fname.toHex()+ "', 1)"));
 }
 
 bool PasswdFileUtil::checkPasswd(QString filename, QString filepass) {
@@ -122,11 +145,32 @@ bool PasswdFileUtil::checkPasswd(QString filename, QString filepass) {
     md5fname = QCryptographicHash::hash(md5fname, QCryptographicHash::Md5);
 
     DButil db(filename);
-    QVector<QSqlRecord>  rvec = db.query("SELECT pass FROM mypass");
+    QVector<QSqlRecord>  rvec = db.query("SELECT pass FROM config");
     if (rvec.count() == 0) {
         return false;
     }
-
     return rvec.at(0).value(0).toString() == md5fname.toHex();
 }
 
+QMap<QString, QVariant> PasswdFileUtil::readConfig() {
+    DButil db(this->filename);
+    QVector<QSqlRecord>  rvec = db.query("SELECT entype, serverip, serverpt FROM config ");
+
+    QMap<QString, QVariant> qmap;
+    if (rvec.size() != 1) {
+        return qmap;
+    }
+    foreach (QSqlRecord qr, rvec) {
+        qmap["entype"] = qr.value(0);
+        qmap["serverip"] = qr.value(1);
+        qmap["serverpt"] = qr.value(2);
+    }
+    return qmap;
+}
+
+bool PasswdFileUtil::updateConfig(QMap<QString, QVariant> config) {
+    DButil db(this->filename);
+    return  db.exec(QString("UPDATE config set entype = %1, serverip = '%2', serverpt = %3").
+                    arg(config["entype"].toInt()).arg(config["serverip"].toString()).arg(config["serverpt"].toInt()));
+
+}

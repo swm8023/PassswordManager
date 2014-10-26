@@ -24,7 +24,8 @@ HEADERS  += mainwindow.h \
     passwdmodel.h
 
 FORMS    += mainwindow.ui \
-    detail.ui
+    detail.ui \
+    config.ui
 
 OTHER_FILES +=
 
